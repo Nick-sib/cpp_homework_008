@@ -1,5 +1,5 @@
 #include <iostream>
-#include "base/IntArray.h"
+#include "base/ArrayClass.h"
 #include "base/ArrayException.h"
 #include "Screen.h"
 
@@ -24,7 +24,7 @@ const char CHAR_RIGTH = (char) 77;
 const char CHAR_LEFT = (char) 75;
 #endif
 
-void createArray(IntArray** intArray)
+/*void createArray(IntArray** intArray)
 {
     printCreateArrayScreen();
 
@@ -263,13 +263,13 @@ void findValue(IntArray* intArray)
     cout << "\npress any key\n";
     getChar();
     getChar();
-}
+}*/
 
 int main() 
 {
-    IntArray* intArray = nullptr;
+    //IntArray* intArray = nullptr;
 
-    char ipunputedChar;
+/*    char ipunputedChar;
     int position = 1;
 
     while (true)  {
@@ -339,6 +339,6 @@ int main()
                     break;                
             }    
         }        
-    delete intArray;
+    delete intArray;*/
     return 0;
 }

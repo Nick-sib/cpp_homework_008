@@ -1,5 +1,5 @@
 #include <iostream>
-#include "base/IntArray.h"
+#include "base/ArrayClass.h"
 
 enum EditType {
         EDIT = 0,
@@ -21,4 +21,4 @@ void printMainScreen(int position);
 void printCreateArrayScreen();
 void printResizeArrayScreen();
 void printEraseArrayScreen();
-void printArrayVertical(IntArray& intArray, int position, int editTypeIndex);
+//void printArrayVertical(IntArray& intArray, int position, int editTypeIndex);
