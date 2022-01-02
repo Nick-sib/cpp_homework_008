@@ -1,7 +1,4 @@
 #include <iostream>
-/*#include <stdio.h>
-#include <termios.h>
-#include <unistd.h>*/
 #include "Screen.h"
 
 using namespace std;
@@ -68,7 +65,7 @@ void printEraseArrayScreen()
     cls();
     cout << "\n  Введите значение которым заполниться массив:\n\n";
 }
-
+/*
 void printArrayVertical(IntArray& intArray, int position, int editTypeIndex)
 {
     cls();
@@ -85,7 +82,7 @@ void printArrayVertical(IntArray& intArray, int position, int editTypeIndex)
     cout << "    " << (position == length + 2 ? "<-->  " : "      ")  <<  "  exit\n";
 }
 
-
+*/
 
 
 
