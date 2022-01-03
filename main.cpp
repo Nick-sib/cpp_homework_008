@@ -24,50 +24,36 @@ const char CHAR_RIGTH = (char) 77;
 const char CHAR_LEFT = (char) 75;
 #endif
 
-/*void createArray(IntArray** intArray)
-{
-    printCreateArrayScreen();
+const int CHAR_DELTA = (int) '0';
 
-    int arrayLength;
-    cin >> arrayLength;
+const int MENU_TYPES_SIZE = 3;
+const string MENU_TYPES[MENU_TYPES_SIZE]  = 
+    {
+        "INTEGER",
+        "FLOAT",
+        "STRING"
+    };
 
-    try
+const int MENU_EVENT_SIZE = 6;
+const string MENU_EVENT[MENU_EVENT_SIZE] = 
     {
-        *intArray = new IntArray(arrayLength);
-    }
-    catch(ArrayLengthException& e)
-    {
-        cerr << "\nВведите размер массива 0 или больше\n\n";
-        cout << "press any key\n";
-        getChar();
-        getChar();
-    }
-    catch(BaseArrayExeption& e)
-    {
-        cout << endl << e.what() << endl;
-        cout << "press any key\n";
-        getChar();
-        getChar();
-    }
-    catch(exception& e)
-    {
-        cerr << endl << e.what() << endl;
-        cout << "press any key\n";
-        getChar();
-        getChar();
-    }
-}
+        "Пересоздать массив",
+        "Показать массив",
+        "Изменить размер",
+        "Очистить массив",
+        "Изменить данные массива",
+        "Найти элемент"
+    };
 
-void printArray(IntArray* intArray)
+template <typename T>
+void printArray(ArrayClass<T>& array)
 {
     cls();
-    if (!intArray)
-        throw "NPE!";
     cout << "МАССИВ:\n\n[";
-    int length = intArray->getLength();
+    int length = array.getLength();
     for (int i = 0; i < length; i++)
     {
-        cout << intArray->get(i);
+        cout << array.get(i);
         if (i != length - 1)
                 cout << ", ";
     }
@@ -75,18 +61,19 @@ void printArray(IntArray* intArray)
     getChar();
 }
 
-void resizeArray(IntArray* intArray)
+template <typename T>
+void resizeArray(ArrayClass<T>& array)
 {
-    printResizeArrayScreen();
-    if (!intArray)
-        throw "NPE!";
+    cls();
+    cout << "\n  Введите новый размер массива:\n\n" 
+        << "       (значения меньше 0 вызовут исключение)\n\n";
     
     int newArrayLength;
     cin >> newArrayLength;
 
-try
+    try
     {
-        intArray->resize(newArrayLength);
+        array.resize(newArrayLength);
     }
     catch(ArrayLengthException& e)
     {
@@ -111,17 +98,17 @@ try
     }
 }
 
-void eraseArray(IntArray* intArray)
+template<typename T>
+void eraseArray(ArrayClass<T>& array)
 {
-    printEraseArrayScreen();
-    if (!intArray)
-        throw "NPE!";
+    cls();
+    cout << "\n  Введите значение которым заполниться массив:\n\n";
     
-    int defaultValue;
+    T defaultValue;
     cin >> defaultValue;
     try
     {
-        intArray->erase(defaultValue);
+        array.erase(defaultValue);
     }
     catch(ArrayLengthException& e)
     {
@@ -146,9 +133,10 @@ void eraseArray(IntArray* intArray)
     }
 }
 
-void doEditing(IntArray* intArray, int position, EditType editType)
+template <typename T>
+void doEditing(ArrayClass<T>& array, int position, EditType editType)
 {
-    int  value = 0;
+    T  value;
     if (editType != DELETE)
     {
         cls();
@@ -158,32 +146,45 @@ void doEditing(IntArray* intArray, int position, EditType editType)
     switch (editType)
     {
         case ADD:
-            intArray->insertAt(value ,position);
+            array.insertAt(value ,position);
             break;
         case EDIT:
-            intArray->get(position) = value;
+            array.get(position) = value;
             break;
         case DELETE:
-            intArray->remove(position);
+            array.remove(position);
             break;
         default:
             break;
     }
 }
 
-void editArray(IntArray* intArray)
+template <typename T>
+void editArray(ArrayClass<T>& array)
 {
-    if (!intArray)
-        throw "NPE!";
+    int length(array.getLength());
+    T* menu = new T[length];
 
-    char ipunputedChar;
-    int position = -1;
+    for (int i = 0; i < length; i++)
+        menu[i] = array.get(i);
+
+    int position = 0;
     int maxPosition = 0;
     int editTypeIndex = 0;
+    char ipunputedChar;
     while (true)
     {
-        maxPosition = intArray->getLength() + 2;
-        printArrayVertical(*intArray, position, editTypeIndex);
+        maxPosition = array.getLength() + 1;        
+        printTemplateMenuWithMarker<T>(
+            "Редактирование массива:\n\n",
+            menu,
+            length,
+            position,
+            true,
+            editToText[editTypeIndex],
+            "       "
+        );
+
         ipunputedChar = getChar();
         switch (ipunputedChar) {
             case CHAR_DOWN:
@@ -198,6 +199,7 @@ void editArray(IntArray* intArray)
             case CHAR_LEFT:
                 editTypeIndex = (editTypeIndex <= 0 ? 2 : editTypeIndex - 1);
                 break;
+
             case CHAR_RETURN:
                 if (position == maxPosition)
                 {
@@ -205,7 +207,13 @@ void editArray(IntArray* intArray)
                 } else {
                     try
                     {
-                        doEditing(intArray, position, intToEditType(editTypeIndex));
+                       doEditing<T>(array, position, intToEditType(editTypeIndex));
+                       delete[] menu;
+                       length = array.getLength();
+                       menu = new T[length];
+
+                        for (int i = 0; i < length; i++)
+                            menu[i] = array.get(i);
                     }
                     catch(ArrayLengthException& e)
                     {
@@ -241,21 +249,21 @@ void editArray(IntArray* intArray)
                 break;
         }
     }
+    delete[] menu;
 }    
 
-void findValue(IntArray* intArray)
+template<typename T>
+void findValue(ArrayClass<T>& array)
 {
-    if (!intArray)
-        throw "NPE!";
     cls();
-    int value = 0;
+    T value;
     cout << "Введите искомое значение: ";
     cin >> value;
-    int firstResult = intArray->findFirst(value);
+    int firstResult = array.findFirst(value);
     cout << "\n" 
         << (firstResult == -1 ? "значение не найдено (" : "первое вхождение элемента (") 
         << firstResult << ")\n";
-    int lastResult = intArray->findLast(value);  
+    int lastResult = array.findLast(value);  
     if (firstResult != lastResult)
     {
         cout << "последнее вхождение элемента (" << lastResult << ")\n";
@@ -263,82 +271,153 @@ void findValue(IntArray* intArray)
     cout << "\npress any key\n";
     getChar();
     getChar();
-}*/
+}
+
+int doVerticalMenu(const char* title, const std::string* menu, int size)
+{
+    char ipunputedChar;
+    int position = 1;
+    while (true)  
+    {
+        printVerticalMenu(title, menu, size, position);        
+        ipunputedChar = getChar();
+        
+        switch (ipunputedChar) 
+        {
+            case '0': case '1': case '2': case '3': 
+            case '4': case '5': case '6': case '7': 
+            case '8': case '9': 
+                position = (int) ipunputedChar - CHAR_DELTA; 
+                position = min(MENU_TYPES_SIZE, position);
+                break;
+            
+            case CHAR_DOWN: 
+                if (position >= size) position = 0; else position++;
+                break;
+            case CHAR_UP:
+                if (position <= 0) position = size; else position--; 
+                break;
+            case CHAR_RETURN:
+                return position;
+            default:
+                break;
+        } 
+    }     
+} 
+
+template <typename T>
+bool workArray(int size)
+{
+    bool result = false;
+    ArrayClass<T>* array;
+    try
+    {
+        array = new ArrayClass<T>(size);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        getChar();
+        return true;
+    }
+    
+    
+    int event;
+    while (true)
+    {
+        event = doVerticalMenu(
+            "  Доступные функции:\n",
+            MENU_EVENT,
+            MENU_EVENT_SIZE
+        ) - 1;
+
+        switch (event)
+        {
+            case -1: 
+                return false;
+            case 0:
+                delete array;
+                return true;
+                break;
+            case 1:
+                printArray<T>(*array);
+                break;   
+            case 2:
+                resizeArray<T>(*array);
+                break;
+            case 3:
+                eraseArray<T>(*array);
+                break;
+            case 4:
+                editArray<T>(*array);
+                break;
+            case 5:
+                findValue<T>(*array);
+                break;
+            default:
+                break;
+        }        
+
+    }
+    delete array;
+    return event != -1;
+}
+
+bool initArrayData(int& arrayType, int& arraySize)
+{
+    arrayType = doVerticalMenu(
+        "  СОЗДАНИЕ МАССВА\n  ВЫБЕРИТЕ ФОРМАТ ДАННЫХ:\n",
+        MENU_TYPES,
+        MENU_TYPES_SIZE
+    ) - 1;
+    if (arrayType == -1) 
+        return false;
+    cls();
+    arraySize = 0;
+    cout << "  СОЗДАНИЕ МАССВА\n  ВВЕДИТЕ РАЗМЕР МАССИВА:\n\n";
+    cin >> arraySize;
+    cls();
+
+    cout << "  БУДЕТ СОЗДАН МАССВ\n  array<" 
+        << MENU_TYPES[arrayType] << "> (" << arraySize << ")\n\n"
+        << "press any key\n";
+        getChar();
+    return true;    
+}
 
 int main() 
 {
-    //IntArray* intArray = nullptr;
+    
+    int arrayType = 0;
+    int arraySize = 0;
 
-/*    char ipunputedChar;
-    int position = 1;
 
-    while (true)  {
-        printMainScreen(position);
-        
-        ipunputedChar = getChar();
-        
-        switch (ipunputedChar) {
-            case '0': position = 0; break;
-            case '1': position = 1; break;
-            case '2': position = 2; break;
-            case '3': position = 3; break;
-            case '4': position = 4; break;
-            case '5': position = 5; break;
-            case '6': position = 6; break;
-            case '7': position = 7; break;
-            case '8': position = 8; break;
-            case '9': position = 9; break;
-            case CHAR_DOWN: 
-                if (position >= 7) position = 0; else position++;
+    bool process = true;
+    while (process)
+    {
+        process = initArrayData(arrayType, arraySize);
+        if (arraySize > 15)
+        {
+            cout << "\nКонечно создать массив такого размера можно но работать с ним будет крайне не удобно\n";
+            getChar();
+        }    
+        switch (arrayType)
+        {
+            case 0:
+                process = workArray<int>(arraySize);
                 break;
-            case CHAR_UP:
-                if (position <= 0) position = 7; else position--; 
+            case 1:
+                process = workArray<float>(arraySize);
                 break;
-            case CHAR_RETURN:
-                try
-                {
-                    switch (position) 
-                    {
-                    case 0:
-                        return 0;  
-                    case 1: 
-                        if (intArray)
-                            delete intArray;
-                        createArray(&intArray);
-                        break;
-                    case 2: 
-                        printArray(intArray);
-                        break;
-                    case 3: 
-                        resizeArray(intArray);
-                        break;
-                    case 4: 
-                        eraseArray(intArray);
-                        break;
-                    case 5:
-                        editArray(intArray);
-                        break;
-                    case 6:
-                        findValue(intArray);
-                        break;    
-                    case 7:
-                        intArray->get(-1);
-                        break;    
-                    default:
-                        break;
-                    }
-                    break;
-                }
-                catch(const char* e)
-                {
-                    std::cerr << e << '\n';
-                    cout << "\n\npress any key\n";
-                    getChar();
-                }
-                default:
-                    break;                
-            }    
-        }        
-    delete intArray;*/
+            case 2:
+                process = workArray<string>(arraySize);
+                break;    
+            default:
+                process = false;
+                break;
+        }     
+    }
+    
+
     return 0;
 }

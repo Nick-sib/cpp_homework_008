@@ -13,9 +13,9 @@ ArrayClass<T>::ArrayClass(int length): _length(length)
 }
 
 template <typename T> 
-ArrayClass<T>::ArrayClass(ArrayClass& array): _length(array.getLength())
+ArrayClass<T>::ArrayClass(ArrayClass<T>& array): _length(array.getLength())
 {
-    if (array.getLength() < 0) 
+    if (_length < 0) 
         throw ArrayLengthException(_length);
     
     if (_length > 0)
@@ -102,18 +102,18 @@ void ArrayClass<T>::resize(int newLength)
     if (newLength <= 0)
         throw ArrayLengthException(newLength);
 
-    T* data{ new T[newLength] };
+    T* newData{ new T[newLength] };
 
     if (_length > 0)
     {
-        T elementsToCopy{ (newLength > _length) ? _length : newLength };
-        for (int index{ 0 }; index < elementsToCopy ; ++index)
-            data[index] = _data[index];
+        int elementsToCopy{ (newLength > _length) ? _length : newLength };
+        for (int index = 0; index < elementsToCopy ; ++index)
+            newData[index] = _data[index];
     }
 
     delete[] _data;
 
-    _data = data;
+    _data = newData;
     _length = newLength;
 }
 
@@ -161,8 +161,3 @@ void ArrayClass<T>::remove(int index)
     _data = data;
     --_length;
 }
-
-template <typename T> 
-void ArrayClass<T>::insertAtBeginning(T value) { insertAt(value, 0); }
-template <typename T> 
-void ArrayClass<T>::insertAtEnd(T value) { insertAt(value, _length); }
