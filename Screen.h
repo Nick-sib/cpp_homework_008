@@ -7,7 +7,7 @@ enum EditType {
         DELETE = 2
     };
 
-static const char* editToText[] = {"<edit>  ", "<add>   ", "<del>   "};
+static const char* editToText[] = {"<edit> ", "<add>  ", "<del>  "};
 
 static EditType intToEditType(int value) 
 {
@@ -16,9 +16,29 @@ static EditType intToEditType(int value)
 
 void cls();
 char getChar();
-void printMainScreen(int position);
+void printVerticalMenu(const char* title, const std::string* menu, int size, int position);
 
-void printCreateArrayScreen();
-void printResizeArrayScreen();
-void printEraseArrayScreen();
-//void printArrayVertical(IntArray& intArray, int position, int editTypeIndex);
+template <typename T>
+void printTemplateMenuWithMarker(
+    const char* title, 
+    T* menu, 
+    int size, 
+    int position,
+    bool extendAdd,
+    const char* marker,
+    const char* clear
+){
+    const int exitIndex = extendAdd ? size + 1 : size;
+    cls();
+    std::cout << title;
+    for (int i = 0; i < size; i++)
+    {
+        std::cout << "   " << (position == i ? marker : clear) << i << " = [" << menu[i] << "]\n";
+    }
+    if (extendAdd) {
+        std::cout << "   " << (position == size ? marker : clear) << size << " = [add/error" << "]\n";    
+    }
+    std::cout << "     ----------------------------------------\n"
+        << "    " << (position == exitIndex ? " >  " : "      ")  <<  "  exit\n";
+
+};
