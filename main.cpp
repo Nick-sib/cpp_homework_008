@@ -136,13 +136,14 @@ void eraseArray(ArrayClass<T>& array)
 template <typename T>
 void doEditing(ArrayClass<T>& array, int position, EditType editType)
 {
-    T  value;
+    T value;
     if (editType != DELETE)
     {
         cls();
         cout << "Введите значение для элкмента:\n\n";
         cin >> value;
     }
+
     switch (editType)
     {
         case ADD:
@@ -188,10 +189,10 @@ void editArray(ArrayClass<T>& array)
         ipunputedChar = getChar();
         switch (ipunputedChar) {
             case CHAR_DOWN:
-                position = (position >= maxPosition ? -1 : position + 1);
+                position = (position >= maxPosition ? 0 : position + 1);
                 break;
             case CHAR_UP:
-                position = (position <= -1 ? maxPosition : position - 1);
+                position = (position <= 0 ? maxPosition : position - 1);
                 break;
             case CHAR_RIGTH:
                 editTypeIndex = (editTypeIndex >= 2 ? 0 : editTypeIndex + 1);
